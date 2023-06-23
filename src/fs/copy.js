@@ -1,21 +1,17 @@
-//with fs/promises cp method doesn't call custom error
+import path from "path";
 import { cp } from "fs/promises";
-import { Error_FS } from "../libs/helpers/index.js";
+import { Error_FS, currDir } from "../libs/helpers/index.js";
 
-const src = "./files";
-const dest = "./files_copy";
+const src = path.join(currDir(import.meta.url), "files");
+const dest = path.join(currDir(import.meta.url), "files_copy");
 
+console.log(src, dest);
 const copy = async () => {
   try {
-    cp(
-      src,
-      dest,
-      { recursive: true, errorOnExist: true }
-      //   , (err) => {
-      //   if (err) throw new Error_FS();
-      // }
-    );
-  } catch  {
+    cp(src, dest, { recursive: true }, (err) => {
+      if (err) throw new Error_FS();
+    });
+  } catch {
     throw new Error_FS();
   }
 };

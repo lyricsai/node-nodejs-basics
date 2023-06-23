@@ -1,9 +1,10 @@
 import { rename as renameFile } from "fs/promises";
 import { join } from "path";
-import { Error_FS } from "../libs/helpers/index.js";
+import { Error_FS, currDir } from "../libs/helpers/index.js";
 
-const src = join("files", "wrongFilename.txt");
-const dest = join("files", "properFilename.md");
+currDir(import.meta.url), "files";
+const src = join(currDir(import.meta.url), "files", "wrongFilename.txt");
+const dest = join(currDir(import.meta.url), "files", "properFilename.md");
 
 const rename = async () => {
   try {
