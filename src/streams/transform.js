@@ -1,6 +1,4 @@
-import { pipeline, Transform } from "stream";
-
-process.stdin.pipe(reverseTransform()).pipe(process.stdout);
+import { Transform } from "stream";
 
 const transform = async () => {
   try {
@@ -10,7 +8,8 @@ const transform = async () => {
         callback(null, reversed);
       },
     });
-    pipeline(process.stdin, transformStream, process.stdout);
+
+    process.stdin.pipe(transformStream).pipe(process.stdout);
   } catch (error) {
     throw new Error(error);
   }

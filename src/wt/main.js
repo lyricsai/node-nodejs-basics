@@ -1,36 +1,35 @@
 import { cpus } from "os";
 import path from "path";
-import { currDir } from "../libs/helpers.index.js";
+import { Worker, workerData } from "worker_threads";
+import { currDir } from "../libs/helpers/index.js";
 
-const cores = 4;
-const src = currDir(import.meta.url);
-const workerPath = path.resolve(src, "./worker.js");
+const startNumber = 10;
+const threads = cpus().length;
+const threadsPromises = [];
+const workerPath = path.resolve(currDir(import.meta.url), "worker.js");
 
 const performCalculations = async () => {
-  const calculateFibonacci = (workerData) => {
+  const calculateFibonacci = (data) => {
     return new Promise((resolve, reject) => {
-      const worker = new Worker(workerPath, { workerData });
-      worker.on(
-        "error",
-        resolve((error) => {
-          {
-            status: "error";
-          }
-          throw new Error(error);
-        })
-      );
-      worker.on(
-        "mesage",
-        resolve((data) => ({
+      const worker = new Worker(workerPath, { workerData: data });
+
+      worker.once("message", (data) =>
+        resolve({
           status: "resolved",
           data,
-        }))
+        })
       );
+      worker.once("error", () => resolve({ status: "rejected" }));
     });
   };
 
-  const calc = new Array(cpus).length;
-  calc.fill(null).map((cpu, index));
-  const data = new Promise.all(calc);
+  for (let i = 0; i < threads; i++) {
+    const a = calculateFibonacci(startNumber + i);
+    threadsPromises.push(a);
+  }
+
+  const result = await Promise.all(threadsPromises);
+  console.log(result);
 };
+
 await performCalculations();

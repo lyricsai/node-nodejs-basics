@@ -2,14 +2,17 @@ import path from "path";
 import url from "url";
 import { release, version } from "os";
 import { createServer as createServerHttp } from "http";
-import("./files/c");
+import "./files/c.js";
 
 const random = Math.random();
+let unknownObject;
 
 if (random > 0.5) {
-  const unknownObject = await import("./files/a.json");
+  unknownObject = (await import("./files/a.json", { assert: { type: "json" } }))
+    .default;
 } else {
-  const unknownObject = await import("./files/b.json");
+  unknownObject = (await import("./files/b.json", { assert: { type: "json" } }))
+    .default;
 }
 
 console.log(`Release ${release()}`);
@@ -34,7 +37,4 @@ myServer.listen(PORT, () => {
   console.log("To terminate it, use Ctrl+C combination");
 });
 
-exports = {
-  unknownObject,
-  myServer,
-};
+export { unknownObject, myServer };
