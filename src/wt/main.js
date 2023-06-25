@@ -1,6 +1,6 @@
 import { cpus } from "os";
 import path from "path";
-import { Worker } from "worker_threads";
+import { Worker, workerData } from "worker_threads";
 import { currDir } from "../libs/helpers/index.js";
 
 const startNumber = 10;
@@ -9,30 +9,23 @@ const threadsPromises = [];
 const workerPath = path.resolve(currDir(import.meta.url), "worker.js");
 
 const performCalculations = async () => {
-  const calculateFibonacci = (workerData) => {
+  const calculateFibonacci = (data) => {
     return new Promise((resolve, reject) => {
-      const worker = new Worker(workerPath, { workerData });
+      const worker = new Worker(workerPath, { workerData: data });
 
-      worker.on(
-        "mesage",
+      worker.once("message", (data) =>
         resolve({
           status: "resolved",
-          data: workerData,
+          data,
         })
       );
-
-      worker.on(
-        "error",
-        reject({
-          status: "error",
-          data: null,
-        })
-      );
+      worker.once("error", () => resolve({ status: "rejected" }));
     });
   };
 
   for (let i = 0; i < threads; i++) {
-    threadsPromises.push(calculateFibonacci(startNumber + i));
+    const a = calculateFibonacci(startNumber + i);
+    threadsPromises.push(a);
   }
 
   const result = await Promise.all(threadsPromises);
